@@ -73,11 +73,16 @@ def load_centralized_dataset():
     return DataLoader(dataset, batch_size=128)
 
 
-def train(net, trainloader, epochs, lr, device):
+def train(net, trainloader, epochs, lr, device, mu):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
+    # Save initial global parameters
+    global_params = [
+        param.detach().clone()
+        for param in net.parameters()
+    ]
     net.train()
     running_loss = 0.0
     for _ in range(epochs):
@@ -85,7 +90,19 @@ def train(net, trainloader, epochs, lr, device):
             images = batch["img"].to(device)
             labels = batch["label"].to(device)
             optimizer.zero_grad()
-            loss = criterion(net(images), labels)
+            task_loss = criterion(net(images), labels)
+            # FedProx proximal term
+            proximal_term = 0.0
+
+            for local_param, global_param in zip(
+                net.parameters(),
+                global_params,
+            ):
+                proximal_term += torch.sum(
+                    (local_param - global_param) ** 2
+                )
+
+            loss = task_loss + (mu / 2.0) * proximal_term
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
