@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from datasets import load_dataset
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
+from flwr_datasets.partitioner import PathologicalPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from flwr.app import ArrayRecord, MetricRecord
@@ -64,6 +65,27 @@ def load_data(partition_id: int, num_partitions: int, batch_size: int):
     testloader = DataLoader(partition_train_test["test"], batch_size=batch_size)
     return trainloader, testloader
 
+
+def load_nonIID_data(partition_id: int, num_partitions: int, batch_size: int):
+    """Load partition CIFAR10 data."""
+    # Only initialize `FederatedDataset` once
+    global fds
+    if fds is None:
+        partitioner = PathologicalPartitioner(num_partitions=num_partitions, partition_by="label", num_classes_per_partition=2, class_assignment_mode="first-deterministic")
+        fds = FederatedDataset(
+            dataset="uoft-cs/cifar10",
+            partitioners={"train": partitioner},
+        )
+    partition = fds.load_partition(partition_id)
+    # Divide data on each node: 80% train, 20% test
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
+    # Construct dataloaders
+    partition_train_test = partition_train_test.with_transform(apply_transforms)
+    trainloader = DataLoader(
+        partition_train_test["train"], batch_size=batch_size, shuffle=True
+    )
+    testloader = DataLoader(partition_train_test["test"], batch_size=batch_size)
+    return trainloader, testloader
 
 def load_centralized_dataset():
     """Load test set and return dataloader."""
