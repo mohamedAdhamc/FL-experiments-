@@ -26,6 +26,7 @@ def main(grid: Grid, context: Context) -> None:
 
     # Read run config
     fraction_evaluate: float = context.run_config["fraction-evaluate"]
+    fraction_train: float = context.run_config["fraction-train"]
     num_rounds: int = context.run_config["num-server-rounds"]
     lr: float = context.run_config["learning-rate"]
 
@@ -34,7 +35,7 @@ def main(grid: Grid, context: Context) -> None:
     arrays = ArrayRecord(global_model.state_dict())
 
     # Initialize FedAvg strategy
-    strategy = FedAvg(fraction_evaluate=fraction_evaluate)
+    strategy = FedAvg(fraction_evaluate=fraction_evaluate, fraction_train=fraction_train)
 
     # Start strategy, run FedAvg for `num_rounds`
     result = strategy.start(
