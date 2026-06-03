@@ -10,7 +10,7 @@ from flwr_datasets.partitioner import PathologicalPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from flwr.app import ArrayRecord, MetricRecord
-
+import random
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
@@ -95,7 +95,7 @@ def load_centralized_dataset():
     return DataLoader(dataset, batch_size=128)
 
 
-def train(net, trainloader, epochs, lr, device, mu):
+def train(net, trainloader, epochs, lr, device, mu, percent_stragglers):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
@@ -105,6 +105,9 @@ def train(net, trainloader, epochs, lr, device, mu):
         param.detach().clone()
         for param in net.parameters()
     ]
+    if random.random() < percent_stragglers:
+        epochs = random.randint(0,epochs)
+        
     net.train()
     running_loss = 0.0
     for _ in range(epochs):

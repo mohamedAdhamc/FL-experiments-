@@ -27,6 +27,7 @@ def train(msg: Message, context: Context):
     num_partitions = context.node_config["num-partitions"]
     batch_size = context.run_config["batch-size"]
     # proximal_mu = context.run_config["proximal-mu"]
+    percent_stragglers: float = context.run_config["percent-stragglers"]
     trainloader, _ = load_nonIID_data(partition_id, num_partitions, batch_size)
 
     # Call the training function
@@ -36,7 +37,8 @@ def train(msg: Message, context: Context):
         context.run_config["local-epochs"],
         msg.content["config"]["lr"],
         device,
-        msg.content["config"]["proximal-mu"]
+        msg.content["config"]["proximal-mu"],
+        percent_stragglers
     )
 
     # Construct and return reply Message

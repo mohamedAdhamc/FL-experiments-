@@ -28,8 +28,8 @@ clientapp = "pytorchexample.client_app:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 100
-proximal-mu = 0.1
 fraction-evaluate = 0.5
 local-epochs = 1
 learning-rate = 0.025
 batch-size = 32
+percent-stragglers = 0.1
