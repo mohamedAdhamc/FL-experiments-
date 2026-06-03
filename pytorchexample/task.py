@@ -107,7 +107,7 @@ def train(net, trainloader, epochs, lr, device, mu, percent_stragglers):
     ]
     if random.random() < percent_stragglers:
         epochs = random.randint(0,epochs)
-        
+
     net.train()
     running_loss = 0.0
     for _ in range(epochs):
@@ -131,6 +131,8 @@ def train(net, trainloader, epochs, lr, device, mu, percent_stragglers):
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
+    if epochs==0:
+        return 0.0
     avg_trainloss = running_loss / (epochs * len(trainloader))
     return avg_trainloss
 
