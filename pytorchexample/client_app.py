@@ -26,7 +26,7 @@ def train(msg: Message, context: Context):
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
     batch_size = context.run_config["batch-size"]
-    proximal_mu = context.run_config["proximal-mu"]
+    # proximal_mu = context.run_config["proximal-mu"]
     trainloader, _ = load_nonIID_data(partition_id, num_partitions, batch_size)
 
     # Call the training function
@@ -36,7 +36,7 @@ def train(msg: Message, context: Context):
         context.run_config["local-epochs"],
         msg.content["config"]["lr"],
         device,
-        proximal_mu
+        msg.content["config"]["proximal-mu"]
     )
 
     # Construct and return reply Message

@@ -28,14 +28,14 @@ def main(grid: Grid, context: Context) -> None:
     fraction_evaluate: float = context.run_config["fraction-evaluate"]
     num_rounds: int = context.run_config["num-server-rounds"]
     lr: float = context.run_config["learning-rate"]
-    proximal_mu: float = context.run_config["proximal-mu"]
+    # proximal_mu: float = context.run_config["proximal-mu"]
 
     # Load global model
     global_model = Net()
     arrays = ArrayRecord(global_model.state_dict())
 
     # Initialize FedAvg strategy
-    strategy = FedProx(proximal_mu=proximal_mu)
+    strategy = FedProx(proximal_mu=0.1)
 
     # Start strategy, run FedAvg for `num_rounds`
     result = strategy.start(
