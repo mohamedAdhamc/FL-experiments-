@@ -12,9 +12,6 @@ from pytorchexample.task import global_evaluate
 
 from huggingface_hub import login
 
-#ToDO; remove!!
-login("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")
-
 
 # Create ServerApp
 app = ServerApp()
