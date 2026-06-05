@@ -3,7 +3,9 @@ dataset: [CIFAR-10]
 framework: [torch, torchvision]
 ---
 
-This repo is built to track the code for experiments made on various FL algorithms utilizing the Flower framework. It is built on top of the flower quickstart pytorch guide, and there should generally be separate branches for each different FL algorithm. The main branch here being for FedAvg, the baseline algorithm. 
+# Repository Overview
+
+This repository is built to track the code for experiments made on various FL algorithms utilizing the Flower framework. It is built on top of the flower quickstart pytorch guide, and there should generally be separate branches for each different FL algorithm. The main branch here being for FedAvg, the baseline algorithm. 
 
 
 # Federated Learning with PyTorch and Flower (Quickstart Example)
@@ -68,4 +70,4 @@ flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"  --stream
 ```
 
 > [!TIP]
-> For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
+> For a more detailed walk-through check Flower's [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
