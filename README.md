@@ -1,8 +1,10 @@
 ---
-tags: [quickstart, vision, fds]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]
 ---
+
+This repo is built to track the code for experiments made on various FL algorithms utilizing the Flower framework. It is built on top of the flower quickstart pytorch guide, and there should generally be separate branches for each different FL algorithm. The main branch here being for FedAvg, the baseline algorithm. 
+
 
 # Federated Learning with PyTorch and Flower (Quickstart Example)
 
@@ -67,9 +69,3 @@ flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"  --stream
 
 > [!TIP]
 > For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
-
-### Run with the Deployment Engine
-
-Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
-
-If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
