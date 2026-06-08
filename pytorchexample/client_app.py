@@ -3,6 +3,7 @@
 import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
+from flwr.common import log
 
 from pytorchexample.task import Net, load_data, load_nonIID_data
 from pytorchexample.task import test as test_fn
@@ -27,6 +28,8 @@ def train(msg: Message, context: Context):
     num_partitions = context.node_config["num-partitions"]
     batch_size = context.run_config["batch-size"]
     trainloader, _ = load_nonIID_data(partition_id, num_partitions, batch_size)
+    
+    log(20, f"obtained {msg.content["config"]["server-control-variate"]}")
 
     # Call the training function
     train_loss = train_fn(

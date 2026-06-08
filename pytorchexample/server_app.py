@@ -12,7 +12,6 @@ from pytorchexample.task import global_evaluate
 
 from huggingface_hub import login
 
-
 # Create ServerApp
 app = ServerApp()
 

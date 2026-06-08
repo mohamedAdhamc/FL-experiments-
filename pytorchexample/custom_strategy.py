@@ -88,6 +88,7 @@ class FedAvg_custom(Strategy):
         evaluate_metrics_aggr_fn: (
             Callable[[list[RecordDict], str], MetricRecord] | None
         ) = None,
+        server_control_variate: float = 0.0
     ) -> None:
         self.fraction_train = fraction_train
         self.fraction_evaluate = fraction_evaluate
@@ -101,6 +102,7 @@ class FedAvg_custom(Strategy):
         self.evaluate_metrics_aggr_fn = (
             evaluate_metrics_aggr_fn or aggregate_metricrecords
         )
+        self.server_control_variate = server_control_variate
 
         if self.fraction_evaluate == 0.0:
             self.min_evaluate_nodes = 0
@@ -175,6 +177,12 @@ class FedAvg_custom(Strategy):
         )
         # Always inject current server round
         config["server-round"] = server_round
+
+        # Test inject server control variate
+        # update server control variate 
+        # self.server_control_variate += self.server_control_variate + 0.1
+        # send new server control variate
+        config["server-control-variate"] = self.server_control_variate
 
         # Construct messages
         record = RecordDict(
