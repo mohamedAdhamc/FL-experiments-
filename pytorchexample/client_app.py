@@ -29,7 +29,7 @@ def train(msg: Message, context: Context):
     batch_size = context.run_config["batch-size"]
     trainloader, _ = load_nonIID_data(partition_id, num_partitions, batch_size)
     
-    log(20, f"obtained {msg.content["config"]["server-control-variate"]}")
+    log(20, f"obtained {msg.content['config']['server-control-variate']}")
 
     # Call the training function
     train_loss = train_fn(
