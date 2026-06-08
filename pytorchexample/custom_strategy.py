@@ -180,7 +180,9 @@ class FedAvg_custom(Strategy):
 
         # Test inject server control variate
         # update server control variate 
-        # self.server_control_variate += self.server_control_variate + 0.1
+        log(INFO, f"before at server round {server_round}: {self.server_control_variate}")
+        self.server_control_variate += 0.1
+        log(INFO, f"after at server round {server_round}: {self.server_control_variate}")
         # send new server control variate
         config["server-control-variate"] = self.server_control_variate
 
