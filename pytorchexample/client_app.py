@@ -23,6 +23,10 @@ def train(msg: Message, context: Context):
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
+    # Load the server control variate
+    server_control_variate = msg.content['config']['server-control-variate']
+
+    #log(20, f"obtained {msg.content['config']['server-control-variate']}")
 
     # Load the data
     partition_id = context.node_config["partition-id"]
@@ -30,7 +34,6 @@ def train(msg: Message, context: Context):
     batch_size = context.run_config["batch-size"]
     trainloader, _ = load_nonIID_data(partition_id, num_partitions, batch_size)
     
-    #log(20, f"obtained {msg.content['config']['server-control-variate']}")
 
     # Although the prints were kind of sus not gonna lie
     if "client-state" not in context.state:
@@ -53,6 +56,7 @@ def train(msg: Message, context: Context):
     metrics = {
         "train_loss": train_loss,
         "num-examples": len(trainloader.dataset),
+        "delta_client_control_variate": 3.2 #change to actual variable later
     }
     metric_record = MetricRecord(metrics)
     content = RecordDict({"arrays": model_record, "metrics": metric_record})
