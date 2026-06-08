@@ -9,9 +9,12 @@ from flwr.serverapp.strategy import FedProx
 from pytorchexample.custom_strategy import FedAvg_custom
 from pytorchexample.task import Net, load_centralized_dataset, test
 from pytorchexample.task import global_evaluate
-
+from dotenv import load_dotenv
 from huggingface_hub import login
+import os
 
+load_dotenv()
+login(os.getenv("hugging-face"))
 # Create ServerApp
 app = ServerApp()
 
