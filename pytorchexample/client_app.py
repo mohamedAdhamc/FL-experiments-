@@ -8,6 +8,7 @@ from flwr.common import log
 from pytorchexample.task import Net, load_data, load_nonIID_data
 from pytorchexample.task import test as test_fn
 from pytorchexample.task import train as train_fn
+import random
 
 # Flower ClientApp
 app = ClientApp()
@@ -29,7 +30,14 @@ def train(msg: Message, context: Context):
     batch_size = context.run_config["batch-size"]
     trainloader, _ = load_nonIID_data(partition_id, num_partitions, batch_size)
     
-    log(20, f"obtained {msg.content['config']['server-control-variate']}")
+    #log(20, f"obtained {msg.content['config']['server-control-variate']}")
+
+    # Although the prints were kind of sus not gonna lie
+    if "client-state" not in context.state:
+        context.state["client-state"] = MetricRecord({"client-control-variate": 0.0})
+
+    context.state["client-state"]["client-control-variate"] += random.randint(0, 10)
+    #log(20, f"for client {context.node_config['partition-id']} the client control variate is: {context.state['client-state']['client-control-variate']} ")
 
     # Call the training function
     train_loss = train_fn(
