@@ -6,7 +6,7 @@ from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 from flwr.serverapp.strategy import FedAdagrad
 from flwr.serverapp.strategy import FedProx
-from pytorchexample.custom_strategy import CustomFedAvg
+from pytorchexample.custom_strategy import FedAvg_custom
 from pytorchexample.task import Net, load_centralized_dataset, test
 from pytorchexample.task import global_evaluate
 
@@ -32,7 +32,7 @@ def main(grid: Grid, context: Context) -> None:
     arrays = ArrayRecord(global_model.state_dict())
 
     # Initialize FedAvg strategy
-    strategy = FedAvg(fraction_evaluate=fraction_evaluate, fraction_train=fraction_train)
+    strategy = FedAvg_custom(fraction_evaluate=fraction_evaluate, fraction_train=fraction_train)
 
     # Start strategy, run FedAvg for `num_rounds`
     result = strategy.start(
