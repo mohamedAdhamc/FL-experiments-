@@ -28,7 +28,7 @@ from flwr.common import (
     log,
 )
 from flwr.server import Grid
-from flwr.server.strategy import Strategy
+from flwr.serverapp.strategy import Strategy
 from flwr.serverapp.strategy.strategy_utils import aggregate_arrayrecords, aggregate_metricrecords, sample_nodes, validate_message_reply_consistency
 
 class FedAvg_custom(Strategy):
