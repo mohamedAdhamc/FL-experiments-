@@ -114,6 +114,27 @@ def train(net, trainloader, epochs, lr, device):
     avg_trainloss = running_loss / (epochs * len(trainloader))
     return avg_trainloss
 
+def train_scaffold_client(net, trainloader, epochs, lr, device, server_control_variate, client_control_variate):
+    """Train the model on the training set."""
+    net.to(device)  # move model to GPU if available
+    criterion = torch.nn.CrossEntropyLoss().to(device)
+    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
+    net.train() # put model in training mode
+    running_loss = 0.0
+    for _ in range(epochs):
+        for batch in trainloader:
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
+            optimizer.zero_grad() #zero out previously accumulated grads
+            loss = criterion(net(images), labels)
+            loss.backward() # compute gradients using backprop
+            optimizer.step() # use the gradients to update the weights
+            running_loss += loss.item()
+    avg_trainloss = running_loss / (epochs * len(trainloader))
+    return avg_trainloss
+
+
+
 
 def test(net, testloader, device):
     """Validate the model on the test set."""
