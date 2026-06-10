@@ -147,7 +147,7 @@ class Scaffold(Strategy):
 
 
         self.server_control_variate = [np.zeros_like(p.detach().cpu().numpy()) for p in model.parameters()]
-        
+            
         if self.fraction_evaluate == 0.0:
             self.min_evaluate_nodes = 0
             log(
@@ -222,9 +222,14 @@ class Scaffold(Strategy):
         # Always inject current server round
         config["server-round"] = server_round
 
+
+        print("\n=== Server control variate shapes ===")
+        for i, c in enumerate(self.server_control_variate):
+            print(f"layer {i}: shape = {c.shape}")
+
         # Test inject server control variate
         # get server control variate
-        log(INFO, f"before at server round {server_round}: {self.server_control_variate}")
+        # log(INFO, f"before at server round {server_round}: {self.server_control_variate}")
         #self.server_control_variate += 0.1
         #log(INFO, f"after at server round {server_round}: {self.server_control_variate}")
         # send new server control variate

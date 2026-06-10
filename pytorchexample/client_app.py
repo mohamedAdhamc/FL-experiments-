@@ -28,9 +28,15 @@ def train(msg: Message, context: Context):
     
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     # Load the server control variate
-    c = msg.content['c']
-
-    log(20, f"obtained c from server {c}")
+    c_np = msg.content['c'] #assuming this is numpy also and preserved as such
+    c = [
+        torch.tensor(arr, device=device)
+        for arr in c_np
+    ]#to have each tensor correctly like in model.param if it were to return a list of the tensors
+    print("\n=== Server control variate c at client after processing ===")
+    for i, ci in enumerate(c):
+        print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
+    # log(20, f"obtained c from server {c}")
 
     # Load the data
     partition_id = context.node_config["partition-id"]
