@@ -229,8 +229,14 @@ class Scaffold(Strategy):
         #self.server_control_variate += 0.1
         #log(INFO, f"after at server round {server_round}: {self.server_control_variate}")
         # send new server control variate
-        config["server-control-variate"] = self.server_control_variate["control-variate"]
-
+        config["server-control-variate"] = {
+            "shapes": [len(layer) for layer in self.server_control_variate["control-variate"]],
+            "values": [
+                v
+                for layer in self.server_control_variate["control-variate"]
+                for v in layer
+            ],
+        }
         # Construct messages
         record = RecordDict(
             {self.arrayrecord_key: arrays, self.configrecord_key: config}
