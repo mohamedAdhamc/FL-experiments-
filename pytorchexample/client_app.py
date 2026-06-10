@@ -31,15 +31,15 @@ def train(msg: Message, context: Context):
     c_np = msg.content['c'] #assuming this is numpy also and preserved as such
     print("c_type", type(c_np))
     print("c keys:", c_np.keys())
-    print('c["0"]:', c_np["0"])
-    # c = [
-    #     torch.tensor(c_np[str(i)], device=device)
-    #     for i in range(len(c_np))
-    # ]#to have each tensor correctly like in model.param if it were to return a list of the tensors
-    # print("\n=== Server control variate c at client after processing ===")
-    # for i, ci in enumerate(c):
-    #     print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
-    # # log(20, f"obtained c from server {c}")
+    print('c["0"]:', c_np["0"].numpy())
+    c = [
+        torch.tensor(c_np[str(i)].numpy(), device=device)
+        for i in range(len(c_np))
+    ]#to have each tensor correctly like in model.param if it were to return a list of the tensors
+    print("\n=== Server control variate c at client after processing ===")
+    for i, ci in enumerate(c):
+        print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
+    # log(20, f"obtained c from server {c}")
 
     # Load the data
     partition_id = context.node_config["partition-id"]
