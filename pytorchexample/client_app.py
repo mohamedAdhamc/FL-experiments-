@@ -54,7 +54,7 @@ def train(msg: Message, context: Context):
 
     # Although the prints were kind of sus not gonna lie
     if "client-state" not in context.state:
-        context.state["client-state"] = MetricRecord({"client-control-variate": torch.zeros_like(p).tolist() for p in model.parameters()})
+        context.state["client-state"] = ArrayRecord({"client-control-variate": torch.zeros_like(p).tolist() for p in model.parameters()})
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     client_control_variate = context.state["client-state"]["client-control-variate"]
     print("\n=== Client control variate c at client check ===")
