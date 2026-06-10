@@ -145,7 +145,7 @@ class Scaffold(Strategy):
             evaluate_metrics_aggr_fn or aggregate_metricrecords
         )
         
-        self.server_control_variate = MetricRecord({"client-control-variate": torch.zeros_like(p).tolist() for p in model.parameters()})
+        self.server_control_variate = MetricRecord({"control-variate": torch.zeros_like(p).tolist() for p in model.parameters()})
 
         if self.fraction_evaluate == 0.0:
             self.min_evaluate_nodes = 0
@@ -223,7 +223,7 @@ class Scaffold(Strategy):
 
         # Test inject server control variate
         # get server control variate
-        c  = [torch.tensor(layer) for layer in self.server_control_variate]
+        c  = [torch.tensor(layer) for layer in self.server_control_variate["control-variate"]]
         log(INFO, f"before at server round {server_round}: {c}")
         #self.server_control_variate += 0.1
         #log(INFO, f"after at server round {server_round}: {self.server_control_variate}")
