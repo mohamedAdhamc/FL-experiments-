@@ -73,9 +73,9 @@ def aggregate_arrayrecords(
 
 
 class Scaffold(Strategy):
-    """Federated Averaging strategy.
+    """Scaffold Strategy.
 
-    Implementation based on https://arxiv.org/abs/1602.05629
+    Implementation based on https://arxiv.org/pdf/1910.06378
 
     Parameters
     ----------
