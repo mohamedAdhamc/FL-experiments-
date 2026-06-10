@@ -30,7 +30,7 @@ def train(msg: Message, context: Context):
     # Load the server control variate
     c = msg.content['c']
 
-    #log(20, f"obtained {msg.content['config']['server-control-variate']}")
+    log(20, f"obtained c from server {c}")
 
     # Load the data
     partition_id = context.node_config["partition-id"]
