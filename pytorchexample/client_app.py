@@ -58,7 +58,7 @@ def train(msg: Message, context: Context):
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     client_control_variate = context.state["client-state"]["client-control-variate"]
     print("\n=== Client control variate c at client check ===")
-    for i, ci in enumerate(c):
+    for i, ci in enumerate(client_control_variate):
         print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
 
 
