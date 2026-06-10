@@ -31,7 +31,7 @@ def train(msg: Message, context: Context):
     c_np = msg.content['c'] #assuming this is numpy also and preserved as such
     print("c_type", type(c_np))
     print("c keys:", c_np.keys())
-    print('c["0"]:', c_np["0"].numpy())
+    # print('c["0"]:', c_np["0"].numpy())
     c = [
         torch.tensor(c_np[str(i)].numpy(), device=device)
         for i in range(len(c_np))
