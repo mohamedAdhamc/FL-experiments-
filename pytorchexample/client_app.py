@@ -29,6 +29,9 @@ def train(msg: Message, context: Context):
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     # Load the server control variate
     c_np = msg.content['c'] #assuming this is numpy also and preserved as such
+    print("type(msg.content['c']):", type(msg.content["c"]))
+    print("first element type:", type(msg.content["c"][0]))
+    print("first element:", msg.content["c"][0])
     c = [
         torch.tensor(arr, device=device)
         for arr in c_np
