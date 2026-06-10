@@ -146,7 +146,6 @@ class Scaffold(Strategy):
         )
         self.server_control_variate = [torch.zeros_like(p).tolist() for p in model.parameters()]
 
-
         if self.fraction_evaluate == 0.0:
             self.min_evaluate_nodes = 0
             log(
@@ -222,8 +221,9 @@ class Scaffold(Strategy):
         config["server-round"] = server_round
 
         # Test inject server control variate
-        # update server control variate 
-        log(INFO, f"before at server round {server_round}: {self.server_control_variate}")
+        # get server control variate
+        c  = [torch.tensor(layer) for layer in self.server_control_variate]
+        log(INFO, f"before at server round {server_round}: {c}")
         #self.server_control_variate += 0.1
         #log(INFO, f"after at server round {server_round}: {self.server_control_variate}")
         # send new server control variate
