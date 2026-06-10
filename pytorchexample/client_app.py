@@ -81,7 +81,7 @@ def train(msg: Message, context: Context):
     # test update client control variate
     # context.state["client-state"]["client-control-variate"] += random.randint(0, 10)
     # get ci and log it
-    log(20, f"for client {context.node_config['partition-id']} the client control variate is: {client_control_variate}")
+    # log(20, f"for client {context.node_config['partition-id']} the client control variate is: {client_control_variate}")
 
 
     # Construct and return reply Message
