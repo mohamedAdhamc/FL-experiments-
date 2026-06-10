@@ -118,7 +118,7 @@ def train_scaffold_client(net, trainloader, epochs, lr, device, c, ci):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
+    optimizer = torch.optim.SGD(net.parameters(), lr=lr)
     net.train() # put model in training mode
     assert len(c) == len(list(net.parameters()))
     assert len(ci) == len(list(net.parameters()))

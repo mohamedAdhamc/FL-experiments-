@@ -69,8 +69,8 @@ def train(msg: Message, context: Context):
         context.run_config["local-epochs"],
         msg.content["config"]["lr"],
         device,
-        server_control_variate=c,
-        client_control_variate=client_control_variate
+        c=c,
+        ci=client_control_variate
     )
 
     # test update client control variate
