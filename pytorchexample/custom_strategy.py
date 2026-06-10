@@ -146,7 +146,7 @@ class Scaffold(Strategy):
         )
 
 
-        self.server_control_variate = { "control-variate": [torch.zeros_like(p).tolist() for p in model.parameters()] }
+        self.server_control_variate = [np.zeros_like(p.detach().cpu().numpy()) for p in model.parameters()]
         
         if self.fraction_evaluate == 0.0:
             self.min_evaluate_nodes = 0
@@ -224,22 +224,15 @@ class Scaffold(Strategy):
 
         # Test inject server control variate
         # get server control variate
-        c  = [torch.tensor(layer) for layer in self.server_control_variate["control-variate"]]
-        log(INFO, f"before at server round {server_round}: {c}")
+        log(INFO, f"before at server round {server_round}: {self.server_control_variate}")
         #self.server_control_variate += 0.1
         #log(INFO, f"after at server round {server_round}: {self.server_control_variate}")
         # send new server control variate
-        config["server-control-variate-shapes"] = [ len(layer) for layer in self.server_control_variate["control-variate"]]
 
-        config["server-control-variate-values"] = [
-            v
-            for layer in self.server_control_variate["control-variate"]
-            for v in layer
-        ]
 
         # Construct messages
         record = RecordDict(
-            {self.arrayrecord_key: arrays, self.configrecord_key: config}
+            {self.arrayrecord_key: arrays, self.configrecord_key: config, "c": ArrayRecord(self.server_control_variate)}
         )
         return self._construct_messages(record, node_ids, MessageType.TRAIN)
 

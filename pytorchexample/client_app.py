@@ -28,14 +28,7 @@ def train(msg: Message, context: Context):
     
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     # Load the server control variate
-    vals = msg.content['config']["server-control-variate-values"]
-    shapes = msg.content['config']["server-control-variate-shapes"]
-
-    server_control_variate = []
-    idx = 0
-    for s in shapes:
-        server_control_variate.append(torch.tensor(vals[idx:idx+s]))
-        idx += s
+    c = msg.content['c']
 
     #log(20, f"obtained {msg.content['config']['server-control-variate']}")
 
