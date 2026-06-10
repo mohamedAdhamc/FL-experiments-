@@ -19,6 +19,7 @@ from collections.abc import Callable, Iterable
 from logging import INFO, WARNING
 
 import numpy as np
+import torch
 
 from flwr.app import MessageType
 from flwr.common import (
@@ -115,6 +116,7 @@ class Scaffold(Strategy):
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
+        model, #all we need from the model is basically the dimensionlity so maybe better passs the dim but for now this is fine
         fraction_train: float = 1.0,
         fraction_evaluate: float = 1.0,
         min_train_nodes: int = 2,
@@ -129,7 +131,6 @@ class Scaffold(Strategy):
         evaluate_metrics_aggr_fn: (
             Callable[[list[RecordDict], str], MetricRecord] | None
         ) = None,
-        server_control_variate: float = 0.0
     ) -> None:
         self.fraction_train = fraction_train
         self.fraction_evaluate = fraction_evaluate
@@ -143,7 +144,8 @@ class Scaffold(Strategy):
         self.evaluate_metrics_aggr_fn = (
             evaluate_metrics_aggr_fn or aggregate_metricrecords
         )
-        self.server_control_variate = server_control_variate
+        self.server_control_variate = [torch.zeros_like(p).tolist() for p in model.parameters()]
+
 
         if self.fraction_evaluate == 0.0:
             self.min_evaluate_nodes = 0
@@ -222,8 +224,8 @@ class Scaffold(Strategy):
         # Test inject server control variate
         # update server control variate 
         log(INFO, f"before at server round {server_round}: {self.server_control_variate}")
-        self.server_control_variate += 0.1
-        log(INFO, f"after at server round {server_round}: {self.server_control_variate}")
+        #self.server_control_variate += 0.1
+        #log(INFO, f"after at server round {server_round}: {self.server_control_variate}")
         # send new server control variate
         config["server-control-variate"] = self.server_control_variate
 

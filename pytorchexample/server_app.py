@@ -34,7 +34,7 @@ def main(grid: Grid, context: Context) -> None:
     arrays = ArrayRecord(global_model.state_dict())
 
     # Initialize FedAvg strategy
-    strategy = Scaffold(fraction_evaluate=fraction_evaluate, fraction_train=fraction_train)
+    strategy = Scaffold( global_model, fraction_evaluate=fraction_evaluate, fraction_train=fraction_train)
 
     # Start strategy, run FedAvg for `num_rounds`
     result = strategy.start(
