@@ -72,7 +72,7 @@ def aggregate_arrayrecords(
 
 
 
-class FedAvg_custom(Strategy):
+class Scaffold(Strategy):
     """Federated Averaging strategy.
 
     Implementation based on https://arxiv.org/abs/1602.05629
