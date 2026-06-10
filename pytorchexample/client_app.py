@@ -31,13 +31,13 @@ def train(msg: Message, context: Context):
     c_np = msg.content['c'] #assuming this is numpy also and preserved as such
     print("c_type", type(c_np))
     print("c keys:", c_np.keys())
-    # c = [
-    #     torch.tensor(arr, device=device)
-    #     for arr in c_np
-    # ]#to have each tensor correctly like in model.param if it were to return a list of the tensors
-    # print("\n=== Server control variate c at client after processing ===")
-    # for i, ci in enumerate(c):
-    #     print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
+    c = [
+        torch.tensor(c[str(i)], device=device)
+        for i in range(len(c))
+    ]#to have each tensor correctly like in model.param if it were to return a list of the tensors
+    print("\n=== Server control variate c at client after processing ===")
+    for i, ci in enumerate(c):
+        print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
     # log(20, f"obtained c from server {c}")
 
     # Load the data
