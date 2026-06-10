@@ -23,18 +23,21 @@ def train(msg: Message, context: Context):
     # Load the model and initialize it with the received weights
     model = Net()
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    x = [
+    p.detach().clone()
+    for p in model.parameters()]
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     # Load the server control variate
     c_np = msg.content['c'] #assuming this is numpy also and preserved as such
-    print("c_type", type(c_np))
-    print("c keys:", c_np.keys())
+    # print("c_type", type(c_np))
+    # print("c keys:", c_np.keys())
 
-    print("cuda available:", torch.cuda.is_available())
-    print("cuda device count:", torch.cuda.device_count())
-    print("current device:", torch.cuda.current_device() if torch.cuda.is_available() else None)
+    # print("cuda available:", torch.cuda.is_available())
+    # print("cuda device count:", torch.cuda.device_count())
+    # print("current device:", torch.cuda.current_device() if torch.cuda.is_available() else None)
     # print('c["0"]:', c_np["0"].numpy())
     c = [
         torch.tensor(c_np[str(i)].numpy(), device=device)
@@ -78,10 +81,28 @@ def train(msg: Message, context: Context):
         ci=client_control_variate
     )
 
-    # test update client control variate
-    # context.state["client-state"]["client-control-variate"] += random.randint(0, 10)
-    # get ci and log it
-    # log(20, f"for client {context.node_config['partition-id']} the client control variate is: {client_control_variate}")
+    y = [
+        p.detach().clone()
+        for p in model.parameters()
+    ]
+    lr = msg.content["config"]["lr"]
+    K = context.run_config["local-epochs"]
+    # calc ciplus client control variate
+    ci_plus = []
+
+    for x_layer, y_layer, c_layer, ci_layer in zip(
+        x,
+        y,
+        c,
+        client_control_variate,
+    ):
+        ci_new = ci_layer - c_layer + (x_layer - y_layer) / (lr * K)
+        ci_plus.append(ci_new)
+
+
+    #comm to server the delta c and delta yi
+    
+    #update client control variate (I think ciplus is a list of tensors, and our ci is supposed to be a list of numpy arrays so that it can go in arrayrecord and then state)
 
 
     # Construct and return reply Message
