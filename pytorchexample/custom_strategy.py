@@ -144,7 +144,8 @@ class Scaffold(Strategy):
         self.evaluate_metrics_aggr_fn = (
             evaluate_metrics_aggr_fn or aggregate_metricrecords
         )
-        self.server_control_variate = [torch.zeros_like(p).tolist() for p in model.parameters()]
+        
+        self.server_control_variate = MetricRecord({"client-control-variate": torch.zeros_like(p).tolist() for p in model.parameters()})
 
         if self.fraction_evaluate == 0.0:
             self.min_evaluate_nodes = 0
