@@ -57,6 +57,10 @@ def train(msg: Message, context: Context):
         context.state["client-state"] = MetricRecord({"client-control-variate": torch.zeros_like(p).tolist() for p in model.parameters()})
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     client_control_variate = context.state["client-state"]["client-control-variate"]
+    print("\n=== Client control variate c at client check ===")
+    for i, ci in enumerate(c):
+        print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
+
 
     # Call the training function
     train_loss = scaffold_train_fn(

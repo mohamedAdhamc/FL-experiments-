@@ -114,14 +114,14 @@ def train(net, trainloader, epochs, lr, device):
     avg_trainloss = running_loss / (epochs * len(trainloader))
     return avg_trainloss
 
-def train_scaffold_client(net, trainloader, epochs, lr, device, server_control_variate, client_control_variate):
+def train_scaffold_client(net, trainloader, epochs, lr, device, c, ci):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
     net.train() # put model in training mode
-    # server_control_variate = [c.to(device) for c in server_control_variate]
-    # client_control_variate = [ci.to(device) for ci in client_control_variate]
+    assert len(c) == len(list(net.parameters()))
+    assert len(ci) == len(list(net.parameters()))
     running_loss = 0.0
     for _ in range(epochs):
         for batch in trainloader:
@@ -133,15 +133,17 @@ def train_scaffold_client(net, trainloader, epochs, lr, device, server_control_v
             # # =========================
             # # SCAFFOLD GRADIENT FIX
             # # =========================
-            # with torch.no_grad():
-            #     for p, c, ci in zip(
-            #         net.parameters(),
-            #         server_control_variate,
-            #         client_control_variate
-            #     ):
-            #         if p.grad is not None:
-            #             p.grad -= c
-            #             p.grad += ci            
+            with torch.no_grad():
+                for p, c_layer, ci_layer in zip(
+                    net.parameters(),
+                    c,
+                    ci
+                ):
+                    assert p.shape == c_layer.shape
+                    assert p.shape == ci_layer.shape                    
+                    if p.grad is not None:
+                        p.grad -= ci_layer
+                        p.grad += c_layer
             optimizer.step() # use the gradients to update the weights
             running_loss += loss.item()
     avg_trainloss = running_loss / (epochs * len(trainloader))
