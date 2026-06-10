@@ -32,8 +32,8 @@ def train(msg: Message, context: Context):
     print("c_type", type(c_np))
     print("c keys:", c_np.keys())
     c = [
-        torch.tensor(c[str(i)], device=device)
-        for i in range(len(c))
+        torch.tensor(c_np[str(i)], device=device)
+        for i in range(len(c_np))
     ]#to have each tensor correctly like in model.param if it were to return a list of the tensors
     print("\n=== Server control variate c at client after processing ===")
     for i, ci in enumerate(c):
