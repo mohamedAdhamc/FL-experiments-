@@ -31,6 +31,10 @@ def train(msg: Message, context: Context):
     c_np = msg.content['c'] #assuming this is numpy also and preserved as such
     print("c_type", type(c_np))
     print("c keys:", c_np.keys())
+
+    print("cuda available:", torch.cuda.is_available())
+    print("cuda device count:", torch.cuda.device_count())
+    print("current device:", torch.cuda.current_device() if torch.cuda.is_available() else None)
     # print('c["0"]:', c_np["0"].numpy())
     c = [
         torch.tensor(c_np[str(i)].numpy(), device=device)
