@@ -142,8 +142,21 @@ def evaluate(msg: Message, context: Context):
 
     # Load the model and initialize it with the received weights
     model = Net()
-    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
+    x_arr_rec = msg.content["x"]
+    #x as a list of np arrays
+    x = [ x_arr_rec[str(i)].numpy() for i in range(len(x_arr_rec))] 
+    layer_names = list(model.state_dict().keys())
+
+    state_dict = OrderedDict(
+        (name, torch.from_numpy(val))
+        for name, val in zip(layer_names, x)
+    )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    #x as a torch tensors
+    x = [torch.tensor(x_layer, device=device) for x_layer in x]
+
+    model.load_state_dict(state_dict)
     model.to(device)
 
     # Load the data
