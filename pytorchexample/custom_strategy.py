@@ -354,13 +354,15 @@ class Scaffold(Strategy):
 
             #self.x is a list of numpy arrays
             delta_x_np = [delta_x[i].numpy() for i in range(len(delta_x))]
-            self.x += (delta_x_np * self.server_learning_rate)
+            for i in range(len(delta_x_np)):
+                self.x[i] += (delta_x_np[i] * self.server_learning_rate)
             #server control variate is list of np_arrays
             delta_c_np = [delta_c[i].numpy() for i in range(len(delta_c))]
             num_selected_clients = len(reply_contents)
             total_num_clients = self.num_clients
             frac = float(num_selected_clients/total_num_clients)
-            self.server_control_variate += (frac * delta_c_np)
+            for i in range(delta_c_np):
+                self.server_control_variate[i] += (frac * delta_c_np[i])
 
 
             # Aggregate MetricRecords
