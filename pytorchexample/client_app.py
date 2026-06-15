@@ -23,26 +23,21 @@ def train(msg: Message, context: Context):
     # Load the model and initialize it with the received weights
     model = Net()
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
-    x = [
-    p.detach().clone()
-    for p in model.parameters()]
+    x = [ p.detach().clone() for p in model.parameters()]
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     # Load the server control variate
-    c_np = msg.content['c'] #assuming this is numpy also and preserved as such
-    # print("c_type", type(c_np))
-    # print("c keys:", c_np.keys())
+    c_arrRec = msg.content['c']
 
     # print("cuda available:", torch.cuda.is_available())
     # print("cuda device count:", torch.cuda.device_count())
     # print("current device:", torch.cuda.current_device() if torch.cuda.is_available() else None)
-    # print('c["0"]:', c_np["0"].numpy())
-    c = [
-        torch.tensor(c_np[str(i)].numpy(), device=device)
-        for i in range(len(c_np))
-    ]#to have each tensor correctly like in model.param if it were to return a list of the tensors
+    
+    #list of pytorch tensors of each param
+    c = [ torch.tensor(c_arrRec[str(i)].numpy(), device=device) for i in range(len(c_arrRec))] 
+    
     print("\n=== Server control variate c at client after processing ===")
     for i, ci in enumerate(c):
         print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
@@ -60,10 +55,8 @@ def train(msg: Message, context: Context):
         context.state["client-state"] = ArrayRecord([np.zeros_like(p.detach().cpu().numpy()) for p in model.parameters()])
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     client_control_variate = context.state["client-state"]
-    client_control_variate = [
-        torch.tensor(client_control_variate[str(i)].numpy(), device=device)
-        for i in range(len(client_control_variate))
-    ]#to have each tensor correctly like in model.param if it were to return a list of the tensors
+    #list of tensors form
+    client_control_variate = [torch.tensor(client_control_variate[str(i)].numpy(), device=device) for i in range(len(client_control_variate)) ]
 
     print("\n=== Client control variate c at client check ===")
     for i, ci in enumerate(client_control_variate):
@@ -77,14 +70,11 @@ def train(msg: Message, context: Context):
         context.run_config["local-epochs"],
         msg.content["config"]["lr"],
         device,
-        c=c,
-        ci=client_control_variate
+        c=c,#passes as list of tensors form
+        ci=client_control_variate#passed as list of tensors form
     )
 
-    y = [
-        p.detach().clone()
-        for p in model.parameters()
-    ]
+    y = [ p.detach().clone() for p in model.parameters() ]
     lr = msg.content["config"]["lr"]
     K = context.run_config["local-epochs"]
     # calc ciplus client control variate
@@ -101,9 +91,24 @@ def train(msg: Message, context: Context):
 
 
     #comm to server the delta c and delta yi
-    
-    #update client control variate (I think ciplus is a list of tensors, and our ci is supposed to be a list of numpy arrays so that it can go in arrayrecord and then state)
+    delta_ci_plus = []
+    for ci_plus_layer, ci_layer in zip(ci_plus, client_control_variate):
+        delta_ci_plus.append(ci_plus_layer - ci_layer)
+    #restore list of numpy form for comm
+    delta_ci_plus_np = [delta_ci_plus[i].numpy() for i in range(len(delta_ci_plus))]
+    delta_ci_plus_np_arrrec = ArrayRecord(delta_ci_plus_np)
 
+    delta_y_i = []
+    for x_layer, y_layer in zip(x,y):
+        delta_y_i.append(y_layer-x_layer)
+    delta_y_i_np = [delta_y_i[i].numpy() for i in range(len(delta_y_i))]
+    delta_yi_np_arrrec = ArrayRecord(delta_y_i_np)
+
+    #update client control variate 
+    client_control_variate = ci_plus
+    #restore list of numpy form to store in state
+    client_control_variate_np = [client_control_variate[i].numpy() for i in range(len(client_control_variate))]
+    context.state["client-state"] = ArrayRecord(client_control_variate_np)
 
     # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
@@ -113,7 +118,7 @@ def train(msg: Message, context: Context):
         "delta_client_control_variate": 3.2 #change to actual variable later
     }
     metric_record = MetricRecord(metrics)
-    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    content = RecordDict({"arrays": model_record, "metrics": metric_record, "deltay_i":delta_yi_np_arrrec, "deltaci_plus":delta_ci_plus_np_arrrec})
     return Message(content=content, reply_to=msg)
 
 

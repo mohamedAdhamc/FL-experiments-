@@ -120,8 +120,11 @@ def train_scaffold_client(net, trainloader, epochs, lr, device, c, ci):
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=lr)
     net.train() # put model in training mode
+
+    # if the lengths are not the same that means there are params missing and this is a huge red sign
     assert len(c) == len(list(net.parameters()))
     assert len(ci) == len(list(net.parameters()))
+
     running_loss = 0.0
     for _ in range(epochs):
         for batch in trainloader:
@@ -142,7 +145,7 @@ def train_scaffold_client(net, trainloader, epochs, lr, device, c, ci):
                     print("p shape", p.shape)
                     print("ci_l shape", ci_layer.shape)
                     print("c_l shape", c_layer.shape)
-
+                    # again if this assert were to fail this would impy an issue maybe with the zip
                     assert p.shape == c_layer.shape
                     assert p.shape == ci_layer.shape                    
                     if p.grad is not None:

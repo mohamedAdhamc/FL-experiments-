@@ -145,7 +145,7 @@ class Scaffold(Strategy):
             evaluate_metrics_aggr_fn or aggregate_metricrecords
         )
 
-
+        # a list of zeroed np array equivalents of each parameter tensor
         self.server_control_variate = [np.zeros_like(p.detach().cpu().numpy()) for p in model.parameters()]
             
         if self.fraction_evaluate == 0.0:
