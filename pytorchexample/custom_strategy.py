@@ -79,15 +79,17 @@ def aggregate_arrayrecords(
         #list of pytorch tensors of each param
         deltayi = [ torch.tensor(record.array_records["deltay_i"][str(i)].numpy()) for i in range(len(record.array_records["deltay_i"]))] 
         delta_x += deltayi
-    delta_x = delta_x/len(records) #len(records) should be the number of selected clients
+    for i in range(len(delta_x)):
+        delta_x[i] = delta_x[i]/len(records) #len(records) should be the number of selected clients
     
     #aggregate deltac
-    delta_c = [torch.zeros_like(records[0].array_records["deltaci_plus"][str(i)].numpy()) for i in range(len(records[0].array_records["deltaci_plus"]))]
+    delta_c = [torch.zeros_like(torch.tensor(records[0].array_records["deltaci_plus"][str(i)].numpy())) for i in range(len(records[0].array_records["deltaci_plus"]))]
     for record in records:
         #list of pytorch tensors of each param
         delta_ci = [ torch.tensor(record.array_records["deltaci_plus"][str(i)].numpy()) for i in range(len(record.array_records["deltaci_plus"]))] 
         delta_c += delta_ci
-    delta_c = delta_c/len(records) #len(records) should be the number of selected clients
+    for i in range(len(delta_c)):
+        delta_c[i] = delta_c[i]/len(records) #len(records) should be the number of selected clients
 
 
     return delta_x, delta_c
