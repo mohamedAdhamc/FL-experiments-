@@ -142,9 +142,9 @@ def train_scaffold_client(net, trainloader, epochs, lr, device, c, ci):
                     c,
                     ci
                 ):
-                    print("p shape", p.shape)
-                    print("ci_l shape", ci_layer.shape)
-                    print("c_l shape", c_layer.shape)
+                    # print("p shape", p.shape)
+                    # print("ci_l shape", ci_layer.shape)
+                    # print("c_l shape", c_layer.shape)
                     # again if this assert were to fail this would impy an issue maybe with the zip
                     assert p.shape == c_layer.shape
                     assert p.shape == ci_layer.shape                    
