@@ -94,7 +94,7 @@ def aggregate_arrayrecords(
         delta_c[i] = delta_c[i]/len(records) #len(records) should be the number of selected clients
 
 
-    return delta_x, delta_c
+    return delta_x, delta_c #torch tensors
 
 
 

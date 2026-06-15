@@ -89,7 +89,7 @@ def train(msg: Message, context: Context):
 
     y = [ torch.tensor(p.detach().clone().numpy(), device=device) for p in model.parameters() ]
     lr = msg.content["config"]["lr"]
-    K = context.run_config["local-epochs"]
+    K = context.run_config["local-epochs"] * len(trainloader)
     # calc ciplus client control variate
     ci_plus = []
 
