@@ -11,6 +11,7 @@ from pytorchexample.task import train as train_fn
 from pytorchexample.task import train_scaffold_client as scaffold_train_fn
 import random
 import numpy as np
+from collections import OrderedDict
 
 # Flower ClientApp
 app = ClientApp()
@@ -22,8 +23,19 @@ def train(msg: Message, context: Context):
 
     # Load the model and initialize it with the received weights
     model = Net()
-    model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
-    x = [ p.detach().clone() for p in model.parameters()]
+    x_arr_rec = msg.content["x"]
+    #x as a list of np arrays
+    x = [ x_arr_rec[str(i)].numpy() for i in range(len(x_arr_rec))] 
+    layer_names = list(model.state_dict().keys())
+
+    state_dict = OrderedDict(
+        (name, torch.from_numpy(val))
+        for name, val in zip(layer_names, x)
+    )
+    #x as a torch tensors
+    x = [torch.tensor(x_layer, device=device) for x_layer in x]
+
+    model.load_state_dict(state_dict)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
@@ -74,17 +86,17 @@ def train(msg: Message, context: Context):
         ci=client_control_variate#passed as list of tensors form
     )
 
-    y = [ p.detach().clone() for p in model.parameters() ]
+    y = [ torch.tensor(p.detach().clone().numpy(), device=device) for p in model.parameters() ]
     lr = msg.content["config"]["lr"]
     K = context.run_config["local-epochs"]
     # calc ciplus client control variate
     ci_plus = []
 
     for x_layer, y_layer, c_layer, ci_layer in zip(
-        x,
-        y,
-        c,
-        client_control_variate,
+        x,#list of torch tensors
+        y,#list of torch tensors
+        c,#list of torch tensors
+        client_control_variate,#list of torch tensors
     ):
         ci_new = ci_layer - c_layer + (x_layer - y_layer) / (lr * K)
         ci_plus.append(ci_new)
@@ -118,6 +130,7 @@ def train(msg: Message, context: Context):
         "delta_client_control_variate": 3.2 #change to actual variable later
     }
     metric_record = MetricRecord(metrics)
+    #arrays key is no longer used
     content = RecordDict({"arrays": model_record, "metrics": metric_record, "deltay_i":delta_yi_np_arrrec, "deltaci_plus":delta_ci_plus_np_arrrec})
     return Message(content=content, reply_to=msg)
 

@@ -152,6 +152,8 @@ class Scaffold(Strategy):
         evaluate_metrics_aggr_fn: (
             Callable[[list[RecordDict], str], MetricRecord] | None
         ) = None,
+        server_learning_rate=1.0,
+        num_clients=10,#adjust if running with a diff number
     ) -> None:
         self.fraction_train = fraction_train
         self.fraction_evaluate = fraction_evaluate
@@ -165,10 +167,11 @@ class Scaffold(Strategy):
         self.evaluate_metrics_aggr_fn = (
             evaluate_metrics_aggr_fn or aggregate_metricrecords
         )
-
+        self.server_learning_rate = server_learning_rate
+        self.num_clients = num_clients
         # a list of zeroed np array equivalents of each parameter tensor
         self.server_control_variate = [np.zeros_like(p.detach().cpu().numpy()) for p in model.parameters()]
-        self.x = [np.zeros_like(p.detach().cpu().numpy()) for p in model.parameters()]
+        self.x = [p.detach().cpu().numpy() for p in model.parameters()]
             
         if self.fraction_evaluate == 0.0:
             self.min_evaluate_nodes = 0
@@ -259,7 +262,7 @@ class Scaffold(Strategy):
 
         # Construct messages
         record = RecordDict(
-            {self.arrayrecord_key: arrays, self.configrecord_key: config, "c": ArrayRecord(self.server_control_variate)}
+            {"x": ArrayRecord(self.x), self.configrecord_key: config, "c": ArrayRecord(self.server_control_variate)}
         )
         return self._construct_messages(record, node_ids, MessageType.TRAIN)
 
@@ -347,13 +350,23 @@ class Scaffold(Strategy):
 
             #update x and c
 
+            #self.x is a list of numpy arrays
+            delta_x_np = [delta_x[i].numpy() for i in range(len(delta_x))]
+            self.x += (delta_x_np * self.server_learning_rate)
+            #server control variate is list of np_arrays
+            delta_c_np = [delta_c[i].numpy() for i in range(len(delta_c))]
+            num_selected_clients = len(reply_contents)
+            total_num_clients = self.num_clients
+            frac = float(num_selected_clients/total_num_clients)
+            self.server_control_variate += (frac * delta_c_np)
+
 
             # Aggregate MetricRecords
             metrics = self.train_metrics_aggr_fn(
                 reply_contents,
                 self.weighted_by_key,
             )
-        return arrays, metrics
+        return metrics
 
 
 
@@ -499,15 +512,18 @@ class Scaffold(Strategy):
             #     print(reply.content)#reply.content should have the recorddict that the client sent
 
             # Aggregate train
-            agg_arrays, agg_train_metrics = self.aggregate_train(
+            agg_train_metrics = self.aggregate_train(
                 current_round,
                 train_replies,
             )
 
             # Log training metrics and append to history
-            if agg_arrays is not None:
-                result.arrays = agg_arrays
-                arrays = agg_arrays
+            # if agg_arrays is not None:
+            #     result.arrays = agg_arrays
+            #     arrays = agg_arrays
+
+            #
+
             if agg_train_metrics is not None:
                 log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)
                 result.train_metrics_clientapp[current_round] = agg_train_metrics
