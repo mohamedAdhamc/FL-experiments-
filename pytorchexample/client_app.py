@@ -32,11 +32,12 @@ def train(msg: Message, context: Context):
         (name, torch.from_numpy(val))
         for name, val in zip(layer_names, x)
     )
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     #x as a torch tensors
     x = [torch.tensor(x_layer, device=device) for x_layer in x]
 
     model.load_state_dict(state_dict)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
     #ToDo: check type, perhaps it is safer and better to also cast to a float
