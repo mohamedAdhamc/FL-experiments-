@@ -401,7 +401,7 @@ class Scaffold(Strategy):
 
         # Construct messages
         record = RecordDict(
-            {self.arrayrecord_key: arrays, self.configrecord_key: config}
+            {"x": ArrayRecord(self.x), self.configrecord_key: config}
         )
         return self._construct_messages(record, node_ids, MessageType.EVALUATE)
 
