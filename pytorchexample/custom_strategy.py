@@ -568,7 +568,7 @@ class Scaffold(Strategy):
             # Centralized evaluation
             if evaluate_fn:
                 log(INFO, "Global evaluation")
-                res = evaluate_fn(current_round, arrays)
+                res = evaluate_fn(current_round, ArrayRecord(self.x))
                 log(INFO, "\t└──> MetricRecord: %s", res)
                 if res is not None:
                     result.evaluate_metrics_serverapp[current_round] = res
