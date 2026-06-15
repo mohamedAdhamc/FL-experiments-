@@ -74,18 +74,18 @@ def aggregate_arrayrecords(
     #             else:
     #                 aggregated_np_arrays[key] += value.numpy() * weight
     #aggregate deltax 
-    delta_x = [torch.zeros_like(records[0].content["deltay_i"][str(i)].numpy()) for i in range(len(records[0].content["deltay_i"]))]
+    delta_x = [torch.zeros_like(records[0].array_records["deltay_i"][str(i)].numpy()) for i in range(len(records[0].array_records["deltay_i"]))]
     for record in records:
         #list of pytorch tensors of each param
-        deltayi = [ torch.tensor(record.content["deltay_i"][str(i)].numpy()) for i in range(len(record.content["deltay_i"]))] 
+        deltayi = [ torch.tensor(record.array_records["deltay_i"][str(i)].numpy()) for i in range(len(record.array_records["deltay_i"]))] 
         delta_x += deltayi
     delta_x = delta_x/len(records) #len(records) should be the number of selected clients
     
     #aggregate deltac
-    delta_c = [torch.zeros_like(records[0].content["deltaci_plus"][str(i)].numpy()) for i in range(len(records[0].content["deltaci_plus"]))]
+    delta_c = [torch.zeros_like(records[0].array_records["deltaci_plus"][str(i)].numpy()) for i in range(len(records[0].array_records["deltaci_plus"]))]
     for record in records:
         #list of pytorch tensors of each param
-        delta_ci = [ torch.tensor(record.content["deltaci_plus"][str(i)].numpy()) for i in range(len(record.content["deltaci_plus"]))] 
+        delta_ci = [ torch.tensor(record.array_records["deltaci_plus"][str(i)].numpy()) for i in range(len(record.array_records["deltaci_plus"]))] 
         delta_c += delta_ci
     delta_c = delta_c/len(records) #len(records) should be the number of selected clients
 
