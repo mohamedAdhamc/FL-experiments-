@@ -363,7 +363,7 @@ class Scaffold(Strategy):
             num_selected_clients = len(reply_contents)
             total_num_clients = self.num_clients
             frac = float(num_selected_clients/total_num_clients)
-            for i in range(delta_c_np):
+            for i in range(len(delta_c_np)):
                 self.server_control_variate[i] += (frac * delta_c_np[i])
 
 
