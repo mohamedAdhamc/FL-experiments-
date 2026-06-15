@@ -74,7 +74,7 @@ def aggregate_arrayrecords(
     #             else:
     #                 aggregated_np_arrays[key] += value.numpy() * weight
     #aggregate deltax 
-    delta_x = [torch.zeros_like(records[0].array_records["deltay_i"][str(i)].numpy()) for i in range(len(records[0].array_records["deltay_i"]))]
+    delta_x = [torch.zeros_like(torch.tensor(records[0].array_records["deltay_i"][str(i)].numpy())) for i in range(len(records[0].array_records["deltay_i"]))]
     for record in records:
         #list of pytorch tensors of each param
         deltayi = [ torch.tensor(record.array_records["deltay_i"][str(i)].numpy()) for i in range(len(record.array_records["deltay_i"]))] 
