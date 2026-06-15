@@ -51,9 +51,9 @@ def train(msg: Message, context: Context):
     #list of pytorch tensors of each param
     c = [ torch.tensor(c_arrRec[str(i)].numpy(), device=device) for i in range(len(c_arrRec))] 
     
-    print("\n=== Server control variate c at client after processing ===")
-    for i, ci in enumerate(c):
-        print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
+    # print("\n=== Server control variate c at client after processing ===")
+    # for i, ci in enumerate(c):
+    #     print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
     # log(20, f"obtained c from server {c}")
 
     # Load the data
@@ -71,9 +71,9 @@ def train(msg: Message, context: Context):
     #list of tensors form
     client_control_variate = [torch.tensor(client_control_variate[str(i)].numpy(), device=device) for i in range(len(client_control_variate)) ]
 
-    print("\n=== Client control variate c at client check ===")
-    for i, ci in enumerate(client_control_variate):
-        print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
+    # print("\n=== Client control variate c at client check ===")
+    # for i, ci in enumerate(client_control_variate):
+    #     print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
 
 
     # Call the training function

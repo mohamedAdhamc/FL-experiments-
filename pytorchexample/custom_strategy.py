@@ -252,9 +252,9 @@ class Scaffold(Strategy):
         config["server-round"] = server_round
 
 
-        print("\n=== Server control variate shapes ===")
-        for i, c in enumerate(self.server_control_variate):
-            print(f"layer {i}: shape = {c.shape}")
+        # print("\n=== Server control variate shapes ===")
+        # for i, c in enumerate(self.server_control_variate):
+        #     print(f"layer {i}: shape = {c.shape}")
 
         # Test inject server control variate
         # get server control variate
