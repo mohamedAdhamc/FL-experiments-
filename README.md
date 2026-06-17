@@ -1,11 +1,16 @@
 ---
 dataset: [CIFAR-10]
-framework: [torch, torchvision]
+framework: [torch, torchvision, flower]
 ---
 
 # Repository Overview
 
 This repository is built to track the code for experiments made on various FL algorithms utilizing the Flower framework. It is built on top of the flower quickstart pytorch guide, and there should generally be separate branches for each different FL algorithm. The main branch here being for FedAvg, the baseline algorithm. 
+
+Other branches/algorithms
+
+- Fedprox
+- Scaffold
 
 
 # Federated Learning with PyTorch and Flower (Quickstart Example)
