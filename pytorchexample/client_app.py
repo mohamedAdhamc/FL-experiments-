@@ -87,7 +87,7 @@ def train(msg: Message, context: Context):
         ci=client_control_variate#passed as list of tensors form
     )
 
-    y = [ torch.tensor(p.detach().clone().numpy(), device=device) for p in model.parameters() ]
+    y = [ torch.tensor(p.detach().cpu().clone().numpy(), device=device) for p in model.parameters() ]
     lr = msg.content["config"]["lr"]
     K = context.run_config["local-epochs"] * len(trainloader)
     # calc ciplus client control variate
@@ -108,19 +108,19 @@ def train(msg: Message, context: Context):
     for ci_plus_layer, ci_layer in zip(ci_plus, client_control_variate):
         delta_ci_plus.append(ci_plus_layer - ci_layer)
     #restore list of numpy form for comm
-    delta_ci_plus_np = [delta_ci_plus[i].numpy() for i in range(len(delta_ci_plus))]
+    delta_ci_plus_np = [delta_ci_plus[i].cpu().numpy() for i in range(len(delta_ci_plus))]
     delta_ci_plus_np_arrrec = ArrayRecord(delta_ci_plus_np)
 
     delta_y_i = []
     for x_layer, y_layer in zip(x,y):
         delta_y_i.append(y_layer-x_layer)
-    delta_y_i_np = [delta_y_i[i].numpy() for i in range(len(delta_y_i))]
+    delta_y_i_np = [delta_y_i[i].cpu().numpy() for i in range(len(delta_y_i))]
     delta_yi_np_arrrec = ArrayRecord(delta_y_i_np)
 
     #update client control variate 
     client_control_variate = ci_plus
     #restore list of numpy form to store in state
-    client_control_variate_np = [client_control_variate[i].numpy() for i in range(len(client_control_variate))]
+    client_control_variate_np = [client_control_variate[i].cpu().numpy() for i in range(len(client_control_variate))]
     context.state["client-state"] = ArrayRecord(client_control_variate_np)
 
     # Construct and return reply Message
