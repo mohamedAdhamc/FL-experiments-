@@ -40,49 +40,24 @@ from flwr.serverapp.strategy import Strategy
 from flwr.serverapp.strategy.strategy_utils import aggregate_metricrecords, sample_nodes, validate_message_reply_consistency, log_strategy_start_info
 from typing import cast
 
-
-#plain old fedavg stuff, extracts weighting factors and then aggregates
-#we don't really need the weight factor stuff in scaffold
-#
 def aggregate_arrayrecords(
     records: list[RecordDict], weighting_metric_name: str
 ):
-    """Perform weighted aggregation all ArrayRecords using a specific key."""
-    # Retrieve weighting factor from MetricRecord
-    # weights: list[float] = []
-    # for record in records:
-    #     # Get the first (and only) MetricRecord in the record
-    #     metricrecord = next(iter(record.metric_records.values()))
-    #     # Because replies have been checked for consistency,
-    #     # we can safely cast the weighting factor to float
-    #     w = cast(float, metricrecord[weighting_metric_name])
-    #     weights.append(w)
+    """Aggregate the delta_yi and delta_ci recieved from clients."""
+    ##ToDo: rename the vars to delta_yi, delta_ci
 
-    # Average
-    # total_weight = sum(weights)
-    # weight_factors = [w / total_weight for w in weights]
-
-    # Perform weighted aggregation
-    # aggregated_np_arrays: dict[str, NDArray] = {}
-
-    # for record, weight in zip(records, weight_factors, strict=True):
-    #     for record_item in record.array_records.values():
-    #         # aggregate in-place
-    #         for key, value in record_item.items():
-    #             if key not in aggregated_np_arrays:
-    #                 aggregated_np_arrays[key] = value.numpy() * weight
-    #             else:
-    #                 aggregated_np_arrays[key] += value.numpy() * weight
-    #aggregate deltax 
+    #formula: deltax = 1/num_selected_clients * sum(delta_yi) for i from 1 to num_selected_clients
+    #initialize our agg var to be of zeros like the delta_yi from the first client
     delta_x = [torch.zeros_like(torch.tensor(records[0].array_records["deltay_i"][str(i)].numpy())) for i in range(len(records[0].array_records["deltay_i"]))]
-    for record in records:
-        #list of pytorch tensors of each param
+    for record in records: #iterate over recieved client messages
+        #list of pytorch tensors format of delta_yi
         deltayi = [ torch.tensor(record.array_records["deltay_i"][str(i)].numpy()) for i in range(len(record.array_records["deltay_i"]))] 
         for i in range(len(deltayi)):
-            delta_x[i] += deltayi[i]
-    for i in range(len(delta_x)):
+            delta_x[i] += deltayi[i] # addition part of the aggregation
+    for i in range(len(delta_x)): #scaling the summation
         delta_x[i] = delta_x[i]/len(records) #len(records) should be the number of selected clients
-    
+
+    #formula: deltac = 1/num_selected_clients * sum(delta_ci) for i from 1 to num_selected_clients
     #aggregate deltac
     delta_c = [torch.zeros_like(torch.tensor(records[0].array_records["deltaci_plus"][str(i)].numpy())) for i in range(len(records[0].array_records["deltaci_plus"]))]
     for record in records:
@@ -105,6 +80,7 @@ class Scaffold(Strategy):
 
     Parameters
     ----------
+    model: The pytorch model (ToDo: remove and make strategy model framework agnostic)
     fraction_train : float (default: 1.0)
         Fraction of nodes used during training. In case `min_train_nodes`
         is larger than `fraction_train * total_connected_nodes`, `min_train_nodes`
@@ -136,6 +112,10 @@ class Scaffold(Strategy):
         used to aggregate MetricRecords from training round replies.
         If `None`, defaults to `aggregate_metricrecords`, which performs a weighted
         average using the provided weight factor key.
+    server_learning_rate: 
+        learning rate used in server update.
+    num_clients: 
+        total number of clients in simulation (ToDo: obtain it automatically)     
     """
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
