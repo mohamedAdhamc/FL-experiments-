@@ -307,8 +307,7 @@ class Scaffold(Strategy):
 
             # Aggregate ArrayRecords 
             delta_x, delta_c = aggregate_arrayrecords(
-                reply_contents,
-                self.weighted_by_key,
+                reply_contents
             )
 
             #update x and c
