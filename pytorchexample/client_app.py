@@ -5,7 +5,7 @@ from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common import log
 
-from pytorchexample.task import Net, load_data, load_nonIID_data
+from pytorchexample.task import Net, load_data, load_nonIID_data, load_nonIID_data_oneclassperpartition
 from pytorchexample.task import test as test_fn
 from pytorchexample.task import train as train_fn
 from pytorchexample.task import train_scaffold_client as scaffold_train_fn
@@ -52,7 +52,7 @@ def train(msg: Message, context: Context):
     num_partitions = context.node_config["num-partitions"]
     batch_size = context.run_config["batch-size"]
     percent_stragglers: float = context.run_config["percent-stragglers"]
-    trainloader, _ = load_nonIID_data(partition_id, num_partitions, batch_size)
+    trainloader, _ = load_nonIID_data_oneclassperpartition(partition_id, num_partitions, batch_size)
     
 
     # if it is first time visiting a client, create ci
@@ -152,7 +152,7 @@ def evaluate(msg: Message, context: Context):
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
     batch_size = context.run_config["batch-size"]
-    _, valloader = load_nonIID_data(partition_id, num_partitions, batch_size)
+    _, valloader = load_nonIID_data_oneclassperpartition(partition_id, num_partitions, batch_size)
 
     # Call the evaluation function
     eval_loss, eval_acc = test_fn(
