@@ -158,6 +158,9 @@ def train_scaffold_client(net, trainloader, epochs, lr, device, c, ci, percent_s
                         p.grad += c_layer
             optimizer.step() # use the gradients to update the weights
             running_loss += loss.item()
+    if epochs==0:
+        return 0.0
+    
     avg_trainloss = running_loss / (epochs * len(trainloader))
     return avg_trainloss
 
