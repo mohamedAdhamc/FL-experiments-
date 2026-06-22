@@ -41,7 +41,7 @@ from flwr.serverapp.strategy.strategy_utils import aggregate_metricrecords, samp
 from typing import cast
 
 def aggregate_arrayrecords(
-    records: list[RecordDict], weighting_metric_name: str
+    records: list[RecordDict]
 ):
     """Aggregate the delta_yi and delta_ci recieved from clients."""
     ##ToDo: rename the vars to delta_yi, delta_ci
@@ -210,7 +210,7 @@ class Scaffold(Strategy):
         return messages
 
 
-
+    #send each client x (global model), and c (server control variate)
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
@@ -230,19 +230,6 @@ class Scaffold(Strategy):
         )
         # Always inject current server round
         config["server-round"] = server_round
-
-
-        # print("\n=== Server control variate shapes ===")
-        # for i, c in enumerate(self.server_control_variate):
-        #     print(f"layer {i}: shape = {c.shape}")
-
-        # Test inject server control variate
-        # get server control variate
-        # log(INFO, f"before at server round {server_round}: {self.server_control_variate}")
-        #self.server_control_variate += 0.1
-        #log(INFO, f"after at server round {server_round}: {self.server_control_variate}")
-        # send new server control variate
-
 
         # Construct messages
         record = RecordDict(
@@ -301,14 +288,6 @@ class Scaffold(Strategy):
                 msg.metadata.src_node_id,
                 msg.error.reason,
             )
-
-        # Ensure expected ArrayRecords and MetricRecords are received
-        # if validate and valid_replies:
-        #     validate_message_reply_consistency(
-        #         replies=[msg.content for msg in valid_replies],
-        #         weighted_by_key=self.weighted_by_key,
-        #         check_arrayrecord=is_train,
-        #     )
 
         return valid_replies, error_replies
 
@@ -494,21 +473,12 @@ class Scaffold(Strategy):
                 ),
                 timeout=timeout,
             )
-            # for reply in train_replies:
-            #     print(reply.content)#reply.content should have the recorddict that the client sent
 
             # Aggregate train
             agg_train_metrics = self.aggregate_train(
                 current_round,
                 train_replies,
             )
-
-            # Log training metrics and append to history
-            # if agg_arrays is not None:
-            #     result.arrays = agg_arrays
-            #     arrays = agg_arrays
-
-            #
 
             if agg_train_metrics is not None:
                 log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)

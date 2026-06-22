@@ -34,7 +34,7 @@ def train(msg: Message, context: Context):
     )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    #x as a torch tensors
+    #x as torch tensors
     x = [torch.tensor(x_layer, device=device) for x_layer in x]
 
     model.load_state_dict(state_dict)
@@ -43,19 +43,10 @@ def train(msg: Message, context: Context):
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     # Load the server control variate
     c_arrRec = msg.content['c']
-
-    # print("cuda available:", torch.cuda.is_available())
-    # print("cuda device count:", torch.cuda.device_count())
-    # print("current device:", torch.cuda.current_device() if torch.cuda.is_available() else None)
     
     #list of pytorch tensors of each param
     c = [ torch.tensor(c_arrRec[str(i)].numpy(), device=device) for i in range(len(c_arrRec))] 
     
-    # print("\n=== Server control variate c at client after processing ===")
-    # for i, ci in enumerate(c):
-    #     print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
-    # log(20, f"obtained c from server {c}")
-
     # Load the data
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
@@ -63,17 +54,14 @@ def train(msg: Message, context: Context):
     trainloader, _ = load_nonIID_data(partition_id, num_partitions, batch_size)
     
 
-    # Although the prints were kind of sus not gonna lie
+    # if it is first time visiting a client, create ci
     if "client-state" not in context.state:
         context.state["client-state"] = ArrayRecord([np.zeros_like(p.detach().cpu().numpy()) for p in model.parameters()])
+
     #ToDo: check type, perhaps it is safer and better to also cast to a float
     client_control_variate = context.state["client-state"]
     #list of tensors form
     client_control_variate = [torch.tensor(client_control_variate[str(i)].numpy(), device=device) for i in range(len(client_control_variate)) ]
-
-    # print("\n=== Client control variate c at client check ===")
-    # for i, ci in enumerate(client_control_variate):
-    #     print(f"layer {i}: shape = {tuple(ci.shape)} dtype = {ci.dtype} device = {ci.device}")
 
 
     # Call the training function
@@ -87,7 +75,7 @@ def train(msg: Message, context: Context):
         ci=client_control_variate#passed as list of tensors form
     )
 
-    y = [ torch.tensor(p.detach().cpu().clone().numpy(), device=device) for p in model.parameters() ]
+    y = [ torch.tensor(p.detach().cpu().clone().numpy(), device=device) for p in model.parameters() ] #local model after local training
     lr = msg.content["config"]["lr"]
     K = context.run_config["local-epochs"] * len(trainloader)
     # calc ciplus client control variate
@@ -127,8 +115,7 @@ def train(msg: Message, context: Context):
     model_record = ArrayRecord(model.state_dict())
     metrics = {
         "train_loss": train_loss,
-        "num-examples": len(trainloader.dataset),
-        "delta_client_control_variate": 3.2 #change to actual variable later
+        "num-examples": len(trainloader.dataset)
     }
     metric_record = MetricRecord(metrics)
     #arrays key is no longer used
