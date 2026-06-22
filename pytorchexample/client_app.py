@@ -51,6 +51,7 @@ def train(msg: Message, context: Context):
     partition_id = context.node_config["partition-id"]
     num_partitions = context.node_config["num-partitions"]
     batch_size = context.run_config["batch-size"]
+    percent_stragglers: float = context.run_config["percent-stragglers"]
     trainloader, _ = load_nonIID_data(partition_id, num_partitions, batch_size)
     
 
@@ -72,7 +73,8 @@ def train(msg: Message, context: Context):
         msg.content["config"]["lr"],
         device,
         c=c,#passes as list of tensors form
-        ci=client_control_variate#passed as list of tensors form
+        ci=client_control_variate,#passed as list of tensors form
+        percent_stragglers=percent_stragglers
     )
 
     y = [ torch.tensor(p.detach().cpu().clone().numpy(), device=device) for p in model.parameters() ] #local model after local training

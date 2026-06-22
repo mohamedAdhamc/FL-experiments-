@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from flwr.app import ArrayRecord, MetricRecord
 from collections import OrderedDict
+import random
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
@@ -114,11 +115,15 @@ def train(net, trainloader, epochs, lr, device):
     avg_trainloss = running_loss / (epochs * len(trainloader))
     return avg_trainloss
 
-def train_scaffold_client(net, trainloader, epochs, lr, device, c, ci):
+def train_scaffold_client(net, trainloader, epochs, lr, device, c, ci, percent_stragglers):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=lr)
+
+    if random.random() < percent_stragglers:
+        epochs = random.randint(0,epochs)
+
     net.train() # put model in training mode
 
     # if the lengths are not the same that means there are params missing and this is a huge red sign
