@@ -29,17 +29,23 @@ def train(msg: Message, context: Context):
     # proximal_mu = context.run_config["proximal-mu"]
     percent_stragglers: float = context.run_config["percent-stragglers"]
     trainloader, _ = load_nonIID_data_oneclassperpartition(partition_id, num_partitions, batch_size)
+    
+    if "mu" not in context.state:
+        context.state["mu"] = MetricRecord({"mu": msg.content["config"]["proximal-mu"]})
 
     # Call the training function
-    train_loss = train_fn(
+    train_loss, proxmial_mu = train_fn(
         model,
         trainloader,
         context.run_config["local-epochs"],
         msg.content["config"]["lr"],
         device,
-        msg.content["config"]["proximal-mu"],
-        percent_stragglers
+        context.state["mu"]["mu"],
+        percent_stragglers,
+        adaptive_mu=True
     )
+    #save proximal Mu
+    context.state["mu"] = MetricRecord({"mu": proxmial_mu})
 
     # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())

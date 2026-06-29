@@ -117,7 +117,7 @@ def load_centralized_dataset():
     return DataLoader(dataset, batch_size=128)
 
 
-def train(net, trainloader, epochs, lr, device, mu, percent_stragglers):
+def train(net, trainloader, epochs, lr, device, mu, percent_stragglers, adaptive_mu=False):
     """Train the model on the training set."""
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
@@ -132,6 +132,7 @@ def train(net, trainloader, epochs, lr, device, mu, percent_stragglers):
 
     net.train()
     running_loss = 0.0
+    drift = 0.0
     for _ in range(epochs):
         for batch in trainloader:
             images = batch["img"].to(device)
@@ -148,7 +149,10 @@ def train(net, trainloader, epochs, lr, device, mu, percent_stragglers):
                 proximal_term += torch.sum(
                     (local_param - global_param) ** 2
                 )
-
+                
+            drift = proximal_term
+            if adaptive_mu == True:
+                proximal_term = torch.clamp( proximal_term - 0.1*(1-drift),min=0.0 ,max=2)
             loss = task_loss + (mu / 2.0) * proximal_term
             loss.backward()
             optimizer.step()
@@ -156,7 +160,9 @@ def train(net, trainloader, epochs, lr, device, mu, percent_stragglers):
     if epochs==0:
         return 0.0
     avg_trainloss = running_loss / (epochs * len(trainloader))
-    return avg_trainloss
+    if adaptive_mu == True:
+        return avg_trainloss, proximal_term
+    return avg_trainloss,0.0
 
 
 def test(net, testloader, device):
