@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from flwr.app import ArrayRecord, MetricRecord
 import random
+import math
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
@@ -152,7 +153,14 @@ def train(net, trainloader, epochs, lr, device, mu, percent_stragglers, adaptive
                 
             drift = proximal_term
             if adaptive_mu == True:
-                proximal_term = torch.clamp( proximal_term + 0.1*(1-drift),min=0.0 ,max=2)
+                target_drift = 1.0
+                if(drift != 0):
+                    print("drift not zero")
+                    raw_mu = mu + 0.1 * (math.log(max(1e-1, drift / target_drift)) - 1)
+                else:
+                    raw_mu = mu
+                # Clamp
+                mu = max(0.0, min(raw_mu, 2.0))
             loss = task_loss + (mu / 2.0) * proximal_term
             loss.backward()
             optimizer.step()
@@ -161,7 +169,8 @@ def train(net, trainloader, epochs, lr, device, mu, percent_stragglers, adaptive
         return 0.0
     avg_trainloss = running_loss / (epochs * len(trainloader))
     if adaptive_mu == True:
-        return avg_trainloss, proximal_term
+        print(f"mu:{mu}")
+        return avg_trainloss, mu
     return avg_trainloss,0.0
 
 
