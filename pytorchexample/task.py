@@ -152,7 +152,7 @@ def train(net, trainloader, epochs, lr, device, mu, percent_stragglers, adaptive
                 
             drift = proximal_term
             if adaptive_mu == True:
-                proximal_term = torch.clamp( proximal_term - 0.1*(1-drift),min=0.0 ,max=2)
+                proximal_term = torch.clamp( proximal_term + 0.1*(1-drift),min=0.0 ,max=2)
             loss = task_loss + (mu / 2.0) * proximal_term
             loss.backward()
             optimizer.step()

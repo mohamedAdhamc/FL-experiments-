@@ -30,7 +30,8 @@ def train(msg: Message, context: Context):
     percent_stragglers: float = context.run_config["percent-stragglers"]
     trainloader, _ = load_nonIID_data_oneclassperpartition(partition_id, num_partitions, batch_size)
     
-    if "mu" not in context.state:
+    adaptive_mu = True
+    if adaptive_mu == True and "mu" not in context.state:
         context.state["mu"] = MetricRecord({"mu": msg.content["config"]["proximal-mu"]})
 
     # Call the training function
@@ -44,8 +45,9 @@ def train(msg: Message, context: Context):
         percent_stragglers,
         adaptive_mu=True
     )
-    #save proximal Mu
-    context.state["mu"] = MetricRecord({"mu": proxmial_mu})
+    if adaptive_mu == True:
+        #save proximal Mu
+        context.state["mu"] = MetricRecord({"mu": proxmial_mu})
 
     # Construct and return reply Message
     model_record = ArrayRecord(model.state_dict())
